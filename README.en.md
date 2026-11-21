@@ -130,10 +130,11 @@ Your decks in `~/Documents/html-slides` are kept.
 ![The deck list](images/ui-home.png)
 
 1. Open **HTML Slides**. It creates the **Workspace** `Documents/html-slides/`, which holds `decks/` (sources) and `out/` (results), and copies in the example deck `three-slides`.
-2. Click `three-slides`, then **Build** to see a preview. Click **Present** to open the HTML file in your browser, then press F11 for full screen.
+2. Click `three-slides`, then **Build** to see a preview. Click **Present**: as in PowerPoint, both screens go full screen at once, the Presenter View (current Slide, next click, notes, timer) on the primary screen and the Slide Show on the second. With one screen, the Presenter View fills it (press **Start Slide Show** for a Slide Show window).
    - Next Step: **→**, **Space**, **Enter**, **Page Down** or click.
    - Back: **←**, **Page Up** or **Backspace**.
-   - Leave full screen: **F11** or **Esc**.
+   - Menu: right-click on the Slide Show (go to Slide, black or white screen and more, as in PowerPoint).
+   - End the show: **Esc**, or **End show** in the Presenter View.
 3. Back on **Decks**, type a name such as `heat-flow` and click **New deck**. The program creates `decks/heat-flow/` with:
    - `deck.md`, the deck itself, which opens in your text editor;
    - `brief.md`, a short form: who is the audience, what is the topic, what is the common misconception;
@@ -144,6 +145,8 @@ Your decks in `~/Documents/html-slides` are kept.
 6. Click **Export MP4** or **Export PDF**. The files land in `out/` (**Open output folder**).
 
 `out/<deck>.html` is the whole deck in one file: email it or carry it on a USB stick.
+
+**Deleting a deck**: select it on Home and press **ลบเด็ค** (Delete deck) in the right panel, or the Delete key. The deck's folder and its outputs in `out/` go to the system's Recycle Bin, from where you can restore them. For an Original Deck only the link goes; your HTML file stays where it is.
 
 > To write a deck with an AI such as Claude, give it `brief.md`, `outline.md` and the [deck format](#4-the-deck-format) section of this README, and ask for `deck.md`. Paste the answer into the file, then Build and check.
 
@@ -304,6 +307,42 @@ This writes `decks/lecture/deck.md`, `assets/` and `import-report.md`. The repor
 - **Charts, SmartArt, video and equations**: they become placeholders to redo.
 - **Positions**: they are not imported; the program picks the nearest layout instead.
 
+### Import from an HTML file
+
+A deck saved as one HTML file (one `<section>` per slide) imports with the same command:
+
+```bash
+slides import presentation.html -o decks/talk
+```
+
+The command picks the importer by extension (`.pptx`, `.html`, `.htm`). It writes `deck.md`, `assets/` and `import-report.md`, and builds the Deck straight away. The goal is an editable Deck, not the original look pixel for pixel: the original colours and fonts give way to the program's theme, and the report says, Slide by Slide, what was dropped.
+
+No terminal needed: press **นำเข้า** (Import) on the Decks page of the HTML Slides window, choose **แปลง PPTX / HTML เป็นเด็คที่แก้ได้** (convert) and pick a `.pptx`, `.html` or `.htm` file (up to 300 MB). The file name becomes the Deck name. Claude can also convert through the MCP tool `import` with `original: false`.
+
+Images an HTML file links to as separate files next to it (such as `<img src="pic.png">`) cannot be read through the **นำเข้า** button, because the program receives only the one HTML file. Embed them in the file (data URLs), or use `slides import` or the MCP tool `import`, which read images next to the file. An image that cannot be read is listed under Dropped in the report.
+
+### Open an HTML deck as it is (Original Deck)
+
+Some HTML decks run their own code: simulations, buttons, content that appears step by step. Converting such a file turns all of that into still pictures. Open it as an **Original Deck** instead.
+
+- **Open it**: press **นำเข้า** (Import), choose **เปิด HTML ตามต้นฉบับ** (the first choice) and pick the file. From a terminal: `slides import talk.html -o decks/talk --original`. Claude does the same with the MCP tool `import` (the default for an HTML file).
+- **The file stays where it is**: the program links to it and never writes it. When you change the file, the Deck follows, and the Slide on the stage reloads at the same place. If you move the file, the Deck screen says so and lets you pick it again.
+- **The stage shows the file running**: its buttons and time bars work there. The page strip, the step counter and the notes panel work as for any Deck.
+- **Present** works as for any Deck. One screen: the Presenter View full screen, where the file's own controls can be clicked. Two screens: the Presenter View, and the file full screen on the other screen, both on the same slide and step. With two screens, drive a demo by clicking it on the audience screen.
+- **Esc** closes the file's own overlay first, then ends the show. If the file keeps every Esc for itself, press Esc three times in a row to end.
+- **A link to the web** in the file opens in the computer's browser; the Slide stays where it is.
+- **A file on OneDrive**: if the file is online-only and the computer is offline, the Deck screen says "อ่านไฟล์ต้นฉบับไม่ได้" (the file cannot be read) and keeps showing the last Build. When the file can be read again, the Deck builds by itself.
+- **To change the content**, edit the HTML file itself. Claude can do that with its own file tools.
+- **Not available** for an Original Deck: MP4 and PDF export, and the QA check.
+
+Full support needs two things from the file:
+
+- **A control interface**, one of:
+  - `window.deck = { show(i, k), count, steps(i), state() }`, with slides and steps counted from 0;
+  - or a player of the file's own: slides are `<section class="slide">` shown one at a time, the one shown carries the class `active`, and the left and right arrow keys move it. The program reads the slides from the page: steps from `data-steps` and `data-s`, titles from `data-title`, notes from the slide's `.nt`.
+  - Without either, the Deck still opens and presents, driven by the file's own arrow keys, but without a picture per slide, step counts or notes.
+- **A single file**: images or scripts kept beside it do not load.
+
 ## 10. Updating
 
 - At start, the program checks for a new version at most once a day. You can also use **About and update** > **Check for updates**. A new version shows a banner with its release notes.
@@ -321,10 +360,11 @@ On Ubuntu, use `slides`. On Windows, replace `slides` with `"%LOCALAPPDATA%\Prog
 | `slides ui` | the HTML Slides window |
 | `slides build decks/<name>` | `out/<name>.html` |
 | `slides export decks/<name> --mp4 [--fps 30]` | `out/<name>.mp4` |
-| `slides export decks/<name> --pdf [--per-step]` | `out/<name>.pdf` |
+| `slides export decks/<name> --pdf [--per-step]` | `out/<name>.pdf` (`--per-step`: `out/<name>.steps.pdf`) |
 | `slides capture decks/<name> --stills steps --sheet` | a Still per Step and a Sheet |
 | `slides check decks/<name>` | `out/<name>/qa.md` |
-| `slides import <file.pptx> -o decks/<name>` | a deck from PowerPoint |
+| `slides import <file.pptx or .html> -o decks/<name>` | a deck from PowerPoint or HTML |
+| `slides import <file.html> -o decks/<name> --original` | an Original Deck: the HTML file linked where it is, shown as it is |
 | `slides doctor` | checks Node, ffmpeg, the browser and the fonts |
 | `slides setup [--status]` | downloads or checks the browser and ffmpeg |
 | `slides update --check` | checks for a new version |
